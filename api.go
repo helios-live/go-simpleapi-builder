@@ -3,6 +3,7 @@ package apicontroller
 import (
 	"context"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -24,6 +25,7 @@ type Controller struct {
 	server               *http.Server
 	useDefaultMiddleware bool
 	AuthCallback         AuthCallback
+	listener             *net.Listener
 }
 type key int
 
@@ -48,7 +50,7 @@ func (c *Controller) AddHandler(path string, fn HTTPHandler, methods ...string) 
 }
 
 // Run runs the controller and the listener
-func (c *Controller) Run(addr string) {
+func (c *Controller) Run(addr string) error {
 
 	allowed_origins := os.Getenv("ORIGIN_ALLOWED")
 	if len(allowed_origins) == 0 {
@@ -63,11 +65,24 @@ func (c *Controller) Run(addr string) {
 	}
 	c.server = &http.Server{Addr: addr, Handler: handlers.CORS(headersOk, originsOk, methodsOk)(c.router)}
 
-	log.Println("Running API at http://" + addr)
-	// log.Fatal(http.ListenAndServe(addr, nil))
-	if err := c.server.ListenAndServe(); err != nil {
-		// handle err
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
 	}
+	c.listener = &ln
+
+	laddr := ln.Addr().String()
+
+	log.Println("Running API at http://" + laddr)
+
+	err = c.server.Serve(*c.listener)
+	return err
+
+}
+
+// Addr returns the underlying net.Addr that this server listens on
+func (c *Controller) Addr() net.Addr {
+	return (*c.listener).Addr()
 }
 
 // Stop stops the http listener
