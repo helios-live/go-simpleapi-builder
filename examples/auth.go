@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	apicontroller "github.com/Alex-Eftimie/api-controller"
+	apicontroller "github.com/ideatocode/go-simpleapi-builder"
 )
 
-func authCallback(token string) (id string, err error) {
+func authCallback(token string, req *http.Request) (payload interface{}, err error) {
 	if token == "goodtoken" {
 		return "1", nil
 	}

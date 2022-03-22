@@ -1,4 +1,4 @@
-package apicontroller
+package gsb_test
 
 import (
 	"errors"
@@ -9,17 +9,18 @@ import (
 	"testing"
 	"time"
 
+	gsb "github.com/ideatocode/go-simpleapi-builder"
 	"github.com/stretchr/testify/assert"
 )
 
 var addr string = "127.0.0.1:9999"
 var message string = "Ok!"
 var url string = "http://" + addr + "/testing"
-var c *Controller
+var c *gsb.Controller
 
-func _runServer(ac AuthCallback) {
+func runServer(ac gsb.AuthCallback) {
 
-	c = NewController()
+	c = gsb.NewController()
 
 	c.AddHandler("/testing", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
@@ -39,7 +40,7 @@ func _runServer(ac AuthCallback) {
 	}()
 	time.Sleep(30 * time.Millisecond)
 }
-func _response(resp *http.Response) string {
+func response(resp *http.Response) string {
 
 	defer resp.Body.Close()
 
@@ -50,7 +51,7 @@ func _response(resp *http.Response) string {
 	return string(buf)
 }
 func TestAddHandler(t *testing.T) {
-	_runServer(nil)
+	runServer(nil)
 	defer c.Stop()
 	resp, err := http.Get(url)
 	if ok := assert.Nil(t, err, "Error should be nil"); ok != true {
@@ -61,7 +62,7 @@ func TestAddHandler(t *testing.T) {
 		return
 	}
 
-	result := _response(resp)
+	result := response(resp)
 
 	if ok := assert.Equal(t, message, result, "The response should be: "+message); ok != true {
 		return
@@ -69,7 +70,7 @@ func TestAddHandler(t *testing.T) {
 }
 
 func TestMethods(t *testing.T) {
-	_runServer(nil)
+	runServer(nil)
 	defer c.Stop()
 
 	var ok bool
@@ -86,7 +87,7 @@ func TestMethods(t *testing.T) {
 		return
 	}
 
-	result := _response(resp)
+	result := response(resp)
 	if ok = assert.Equal(t, message, result, "The response should be: "+message); !ok {
 		return
 	}
@@ -111,7 +112,7 @@ func TestMethods(t *testing.T) {
 	}
 
 	// check the response
-	result = _response(resp)
+	result = response(resp)
 	if ok = assert.Equal(t, message, result, "The response should be: "+message); !ok {
 		return
 	}
@@ -119,7 +120,7 @@ func TestMethods(t *testing.T) {
 }
 
 func TestAuthGoodToken(t *testing.T) {
-	_runServer(func(token string) (id string, err error) {
+	runServer(func(token string, req *http.Request) (payload interface{}, err error) {
 		if token == "goodtoken" {
 			return "1", nil
 		}
@@ -148,15 +149,15 @@ func TestAuthGoodToken(t *testing.T) {
 	}
 
 	// check the response
-	result := _response(resp)
+	result := response(resp)
 	if ok = assert.Equal(t, message, result, "The response should be: "+message); !ok {
 		return
 	}
 }
 
-func TestAuthBadoken(t *testing.T) {
+func TestAuthBadToken(t *testing.T) {
 	errorMessage := "Token not found"
-	_runServer(func(token string) (id string, err error) {
+	runServer(func(token string, req *http.Request) (payload interface{}, err error) {
 		if token == "goodtoken" {
 			return "1", nil
 		}
@@ -180,7 +181,7 @@ func TestAuthBadoken(t *testing.T) {
 		return
 	}
 
-	if ok = assert.Equal(t, 500, resp.StatusCode, "Status should be 500"); !ok {
+	if ok = assert.Equal(t, http.StatusUnauthorized, resp.StatusCode, "Status should be 401"); !ok {
 		return
 	}
 
