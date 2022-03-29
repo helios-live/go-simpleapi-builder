@@ -1,4 +1,4 @@
-module github.com/ideatocode/go-simpleapi-builder
+module go.ideatocode.tech/api
 
 go 1.17
 
