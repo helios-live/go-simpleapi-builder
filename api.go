@@ -1,4 +1,4 @@
-package gsb
+package api // import go.ideatocode.tech/api
 
 import (
 	"context"
