@@ -2,7 +2,6 @@ package gsb
 
 import (
 	"context"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -70,10 +69,6 @@ func (c *Controller) Run(addr string) error {
 		return err
 	}
 	c.listener = &ln
-
-	laddr := ln.Addr().String()
-
-	log.Println("Running API at http://" + laddr)
 
 	err = c.server.Serve(*c.listener)
 	return err
