@@ -1,4 +1,4 @@
-package gsb_test
+package api_test
 
 import (
 	"errors"
@@ -9,18 +9,18 @@ import (
 	"testing"
 	"time"
 
-	gsb "github.com/ideatocode/go-simpleapi-builder"
 	"github.com/stretchr/testify/assert"
+	api "go.ideatocode.tech/api"
 )
 
 var addr string = "127.0.0.1:9999"
 var message string = "Ok!"
 var url string = "http://" + addr + "/testing"
-var c *gsb.Controller
+var c *api.Controller
 
-func runServer(ac gsb.AuthCallback) {
+func runServer(ac api.AuthCallback) {
 
-	c = gsb.NewController()
+	c = api.NewController()
 
 	c.AddHandler("/testing", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {

@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	apicontroller "github.com/ideatocode/go-simpleapi-builder"
 )
 
 func authCallback(token string, req *http.Request) (payload interface{}, err error) {
@@ -17,7 +15,7 @@ func authCallback(token string, req *http.Request) (payload interface{}, err err
 }
 
 func main() {
-	c := apicontroller.NewController()
+	c := api.NewController()
 	defer c.Stop()
 
 	c.AuthCallback = authCallback
