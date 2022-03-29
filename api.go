@@ -51,12 +51,12 @@ func (c *Controller) AddHandler(path string, fn HTTPHandler, methods ...string) 
 // Run runs the controller and the listener
 func (c *Controller) Run(addr string) error {
 
-	allowed_origins := os.Getenv("ORIGIN_ALLOWED")
-	if len(allowed_origins) == 0 {
-		allowed_origins = "*"
+	allowedOrigins := os.Getenv("ORIGIN_ALLOWED")
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = "*"
 	}
 	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Authorization"})
-	originsOk := handlers.AllowedOrigins([]string{allowed_origins})
+	originsOk := handlers.AllowedOrigins([]string{allowedOrigins})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
 	if c.useDefaultMiddleware {
