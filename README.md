@@ -8,7 +8,7 @@ go get go.ideatocode.tech/api
 ```
 ### Import
 ```go
-import apicontroller "go.ideatocode.tech/api"
+import api "go.ideatocode.tech/api"
 ```
 ### Example
 Check the examples dir for a complete working example# go-simpleapi-builder
