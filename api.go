@@ -2,6 +2,7 @@ package api // import go.ideatocode.tech/api
 
 import (
 	"context"
+	"encoding/base64"
 	"net"
 	"net/http"
 	"os"
@@ -107,13 +108,26 @@ func (c *Controller) defaultAuthMiddleware(next http.Handler) http.Handler {
 
 		header := r.Header.Get("Authorization")
 		parts := strings.Split(header, " ")
-		if parts[0] != "Bearer" {
+
+		var token string
+
+		switch parts[0] {
+		case "Bearer":
+			token = parts[1]
+
+		case "Basic":
+			data, err := base64.StdEncoding.DecodeString(parts[1])
+			if err != nil {
+				w.Header().Add("X-Error", "Improper authorization header, failed to decode base64 string")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			token = string(data)
+		default:
 			w.Header().Add("X-Error", "Only Authorization: Bearer Allowed")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-
-		token := parts[1]
 
 		fn := c.AuthCallback
 		id, err := fn(token, r)

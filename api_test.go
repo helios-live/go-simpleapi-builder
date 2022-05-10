@@ -155,6 +155,42 @@ func TestAuthGoodToken(t *testing.T) {
 	}
 }
 
+func TestAuthGoodBase64Token(t *testing.T) {
+	runServer(func(token string, req *http.Request) (payload interface{}, err error) {
+		if token == "goodbase64token" {
+			return "1", nil
+		}
+		return "", errors.New("Token not found")
+	})
+	defer c.Stop()
+
+	var ok bool
+
+	// init request
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if ok = assert.Nil(t, err, "Error should be nil"); !ok {
+		return
+	}
+
+	// Test good token
+	req.Header.Add("Authorization", "Basic Z29vZGJhc2U2NHRva2Vu")
+	// perform the put request
+	resp, err := http.DefaultClient.Do(req)
+	if ok = assert.Nil(t, err, "Error should be nil"); !ok {
+		return
+	}
+
+	if ok = assert.Equal(t, 200, resp.StatusCode, "Status should be 200"); !ok {
+		return
+	}
+
+	// check the response
+	result := response(resp)
+	if ok = assert.Equal(t, message, result, "The response should be: "+message); !ok {
+		return
+	}
+}
+
 func TestAuthBadToken(t *testing.T) {
 	errorMessage := "Token not found"
 	runServer(func(token string, req *http.Request) (payload interface{}, err error) {
