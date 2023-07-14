@@ -1,4 +1,4 @@
-package api_test
+package api
 
 import (
 	"errors"
@@ -10,17 +10,17 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	api "go.ideatocode.tech/api"
+	// api "go.ideatocode.tech/api"
 )
 
 var addr string = "127.0.0.1:9999"
 var message string = "Ok!"
 var url string = "http://" + addr + "/testing"
-var c *api.Controller
+var c *Controller
 
-func runServer(ac api.AuthCallback) {
+func runServer(ac AuthCallback) {
 
-	c = api.NewController()
+	c = NewController()
 
 	c.AddHandler("/testing", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
@@ -226,4 +226,13 @@ func TestAuthBadToken(t *testing.T) {
 	if ok = assert.Equal(t, errorMessage, result, "Error should be: "+errorMessage); !ok {
 		return
 	}
+}
+
+func TestOptsFunc(t *testing.T) {
+
+	c = NewController(
+		WithAnonymousRequests(),
+	)
+
+	assert.Equal(t, true, c.allowAnonymousRequests, "hasAnonymousRequests should be: true")
 }

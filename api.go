@@ -21,11 +21,12 @@ type AuthCallback func(token string, req *http.Request) (payload interface{}, er
 
 // Controller runs the controller
 type Controller struct {
-	router               *mux.Router
-	server               *http.Server
-	useDefaultMiddleware bool
-	AuthCallback         AuthCallback
-	listener             *net.Listener
+	router                 *mux.Router
+	server                 *http.Server
+	useDefaultMiddleware   bool
+	AuthCallback           AuthCallback
+	listener               *net.Listener
+	allowAnonymousRequests bool
 }
 type key int
 
@@ -35,13 +36,27 @@ const (
 	// ...
 )
 
+type SetOptFunc func(*Controller)
+
 // NewController creates a new HTTP API controller
-func NewController() *Controller {
+func NewController(list ...SetOptFunc) *Controller {
 	c := Controller{
-		router:               mux.NewRouter(),
-		useDefaultMiddleware: true,
+		router:                 mux.NewRouter(),
+		useDefaultMiddleware:   true,
+		allowAnonymousRequests: false,
+	}
+	// loop through the list
+	for _, fn := range list {
+		fn(&c)
 	}
 	return &c
+}
+
+// WithAnonymousRequests allows requests with no auth headers through to the auth middleware
+func WithAnonymousRequests() SetOptFunc {
+	return func(c *Controller) {
+		c.allowAnonymousRequests = true
+	}
 }
 
 // AddHandler adds a handler
@@ -124,9 +139,11 @@ func (c *Controller) defaultAuthMiddleware(next http.Handler) http.Handler {
 			}
 			token = string(data)
 		default:
-			w.Header().Add("X-Error", "Only Authorization: Bearer Allowed")
-			w.WriteHeader(http.StatusUnauthorized)
-			return
+			if !c.allowAnonymousRequests {
+				w.Header().Add("X-Error", "Only Authorization: Bearer Allowed")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 		}
 
 		fn := c.AuthCallback
