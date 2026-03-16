@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	// api "go.ideatocode.tech/api"
 )
 
 var addr string = "127.0.0.1:9999"

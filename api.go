@@ -1,4 +1,4 @@
-package api // import go.ideatocode.tech/api
+package api
 
 import (
 	"context"

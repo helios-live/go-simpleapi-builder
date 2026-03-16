@@ -1,4 +1,4 @@
-module go.ideatocode.tech/api
+module github.com/helios-live/go-simpleapi-builder/v2
 
 go 1.17
 
